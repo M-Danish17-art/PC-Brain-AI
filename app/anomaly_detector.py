@@ -482,23 +482,58 @@ def run_anomaly_detection():
             metric_id
         )
 
+       # --------------------------------------------------------
+    # Smart Final Summary
     # --------------------------------------------------------
-    # Final summary
-    # --------------------------------------------------------
+
+    high_count = 0
+    medium_count = 0
+    low_count = 0
+
+    max_cpu = max(row[2] for row in rows)
+    max_ram = max(row[3] for row in rows)
+    max_disk = max(row[4] for row in rows)
+
+    for row, prediction in zip(rows, predictions):
+
+        if prediction == -1:
+            severity = get_severity(
+                row[2],
+                row[3],
+                row[4],
+                baseline
+            )
+
+            if severity == "HIGH":
+                high_count += 1
+            elif severity == "MEDIUM":
+                medium_count += 1
+            else:
+                low_count += 1
 
     print()
     print("=" * 70)
+    print("                    SMART SYSTEM SUMMARY")
+    print("=" * 70)
 
-    print(
-        f"Anomalies detected : "
-        f"{anomaly_count}"
-    )
+    print()
+    print(f"Records analyzed : {len(rows)}")
+    print(f"Anomalies        : {anomaly_count}")
+    print(f"Normal records   : {normal_count}")
 
-    print(
-        f"Normal records     : "
-        f"{normal_count}"
-    )
+    print()
+    print("Severity:")
+    print(f"  HIGH   : {high_count}")
+    print(f"  MEDIUM : {medium_count}")
+    print(f"  LOW    : {low_count}")
 
+    print()
+    print("Highest Recorded Usage:")
+    print(f"  CPU  : {max_cpu:.1f}%")
+    print(f"  RAM  : {max_ram:.1f}%")
+    print(f"  Disk : {max_disk:.1f}%")
+
+    print()
     print("=" * 70)
 
 
