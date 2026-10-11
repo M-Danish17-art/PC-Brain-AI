@@ -2,7 +2,7 @@ import statistics
 from sklearn.ensemble import IsolationForest
 
 from database import get_connection
-
+from reporting import export_anomaly_report
 
 # ============================================================
 # LOAD METRICS
@@ -400,7 +400,8 @@ def run_anomaly_detection():
 
     anomaly_count = 0
     normal_count = 0
-
+    anomaly_records = []
+    
     for row, prediction in zip(rows, predictions):
 
         metric_id = row[0]
@@ -438,7 +439,15 @@ def run_anomaly_detection():
             disk,
             baseline
         )
-
+        anomaly_records.append({
+            "record_id": metric_id,
+            "timestamp": timestamp,
+            "cpu_usage": cpu,
+            "ram_usage": ram,
+            "disk_usage": disk,
+            "severity": severity,
+            "explanation": "; ".join(explanations),
+        })
         print()
         print(
             f"⚠ ANOMALY DETECTED — "
@@ -481,7 +490,11 @@ def run_anomaly_detection():
         show_process_contributors(
             metric_id
         )
+    # Export anomaly report
+    report_path = export_anomaly_report(anomaly_records)
 
+    print()
+    print(f"CSV report saved: {report_path}")
        # --------------------------------------------------------
     # Smart Final Summary
     # --------------------------------------------------------
